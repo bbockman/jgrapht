@@ -53,23 +53,27 @@ public class ALTInconsistentHeuristic<V, E>
     private final Map<V, Map<V, Double>> toLandmark;
     private final V[] keySet;
     private final boolean directed;
+    private final Random rng;
     
     private Map<V, V> landmarkSelection;
 
     /**
      * Constructs a new {@link AStarAdmissibleHeuristic} using a set of landmarks.
      *
-     * @param graph the graph
-     * @param landmarks a set of vertices of the graph which will be used as landmarks
+     * @param graph The graph.
+     * @param landmarks A set of vertices of the graph which will be used as landmarks.
+     * @param seed Seed for random landmark selection.
      *
      * @throws IllegalArgumentException if no landmarks are provided
      * @throws IllegalArgumentException if the graph contains edges with negative weights
      */
     
-    public ALTInconsistentHeuristic(Graph<V, E> graph, Set<V> landmarks)
+    public ALTInconsistentHeuristic(Graph<V, E> graph, Set<V> landmarks, long seed)
     {
         this.graph = Objects.requireNonNull(graph, "Graph cannot be null");
+        this.rng = new Random(seed);
         Objects.requireNonNull(landmarks, "Landmarks cannot be null");
+        landmarkSelection = new HashMap<>();
         if (landmarks.isEmpty()) {
             throw new IllegalArgumentException("At least one landmark must be provided");
         }
@@ -110,32 +114,55 @@ public class ALTInconsistentHeuristic<V, E>
      */
     @Override
     public double getCostEstimate(V u, V t)
-    {
-        double randEstimate = 0d;
+    {   
+        double maxEstimate = 0d;
 
         /*
-         * choose a random landmark for this source 
+         * Special case, source equals target
          */
-        if (!landmarkSelection.containsKey(u)) {
-           int index = (int) Math.random() * keySet.length; 
+        if (u.equals(t)) {
+            return maxEstimate;
+        }
+
+        /*
+         * Special case, source is landmark
+         */
+        if (fromLandmark.containsKey(u)) {
+            return fromLandmark.get(u).get(t);
+        }
+
+        /*
+         * Special case, target is landmark
+         */
+        if (toLandmark.containsKey(t)) {
+            return toLandmark.get(t).get(u);
+        }
+
+        /*
+         * Compute from landmarks
+         */
+        
+        if(!landmarkSelection.containsKey(u)) {
+           int index = rng.nextInt(keySet.length);
            landmarkSelection.put(u, keySet[index]);
         }
+        V l = landmarkSelection.get(u);
         
         double estimate;
-        Map<V, Double> from = fromLandmark.get(landmarkSelection.get(u));
+        Map<V, Double> from = fromLandmark.get(l);
         if (directed) {
-            Map<V, Double> to = toLandmark.get(landmarkSelection.get(u));
+            Map<V, Double> to = toLandmark.get(l);
             estimate = Math.max(to.get(u) - to.get(t), from.get(t) - from.get(u));
         } else {
             estimate = Math.abs(from.get(u) - from.get(t));
         }
-        
-        // ensure no overflow
-        if (Double.isFinite(estimate)) {
-            randEstimate = estimate;
-        }
 
-        return randEstimate;
+        // max over all landmarks
+        if (Double.isFinite(estimate)) {
+            maxEstimate = Math.max(maxEstimate, estimate);
+        }
+        
+        return maxEstimate;
     }
 
     /**
