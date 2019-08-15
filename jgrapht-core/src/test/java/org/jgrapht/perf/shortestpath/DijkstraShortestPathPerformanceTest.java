@@ -243,6 +243,36 @@ public class DijkstraShortestPathPerformanceTest
         }
     }
     
+    public static class AStarALTIncBenchmark
+        extends
+        BenchmarkBase
+    {
+        private int totalLandmarks;
+
+        AStarALTIncBenchmark(int totalLandmarks)
+        {
+            this.totalLandmarks = totalLandmarks;
+        }
+
+        @Override
+        ShortestPathAlgorithm<Integer, DefaultWeightedEdge> createSolver(
+            Graph<Integer, DefaultWeightedEdge> graph)
+        {
+            Integer[] vertices = graph.vertexSet().toArray(new Integer[0]);
+            Set<Integer> landmarks = new HashSet<>();
+            while (landmarks.size() < totalLandmarks) {
+                landmarks.add(vertices[rng.nextInt(graph.vertexSet().size())]);
+            }
+            return new AStarShortestPath<>(graph, new ALTInconsistentHeuristic<>(graph, landmarks));
+        }
+
+        @Override
+        public String toString()
+        {
+            return "A* with probable inconsistent heuristic (" + totalLandmarks + " landmarks)";
+        }
+    }
+    
     public static class AStarInconsistentNoHeuristicBenchmark
         extends
         BenchmarkBase
@@ -289,6 +319,36 @@ public class DijkstraShortestPathPerformanceTest
         public String toString()
         {
             return "A* Inconsistent ALT heuristic (" + totalLandmarks + " landmarks)";
+        }
+    }
+    
+    public static class AStarInconsistentALTIncBenchmark
+        extends
+        BenchmarkBase
+    {
+        private int totalLandmarks;
+
+        AStarInconsistentALTIncBenchmark(int totalLandmarks)
+        {
+            this.totalLandmarks = totalLandmarks;
+        }
+
+        @Override
+        ShortestPathAlgorithm<Integer, DefaultWeightedEdge> createSolver(
+            Graph<Integer, DefaultWeightedEdge> graph)
+        {
+            Integer[] vertices = graph.vertexSet().toArray(new Integer[0]);
+            Set<Integer> landmarks = new HashSet<>();
+            while (landmarks.size() < totalLandmarks) {
+                landmarks.add(vertices[rng.nextInt(graph.vertexSet().size())]);
+            }
+            return new AStarInconsistentShortestPath<>(graph, new ALTInconsistentHeuristic<>(graph, landmarks));
+        }
+
+        @Override
+        public String toString()
+        {
+            return "A* Inconsistent with inconsistent heuristic (" + totalLandmarks + " landmarks)";
         }
     }
 
@@ -356,6 +416,8 @@ public class DijkstraShortestPathPerformanceTest
         List<Supplier<BenchmarkBase>> algFactory = new ArrayList<>();
         algFactory.add(() -> new ClosestFirstIteratorBenchmark());
         algFactory.add(() -> new DijkstraBenchmark());
+        algFactory.add(() -> new AStarALTIncBenchmark(5));
+        algFactory.add(() -> new AStarInconsistentALTIncBenchmark(5));
         algFactory.add(() -> new AStarNoHeuristicBenchmark());
         algFactory.add(() -> new AStarInconsistentNoHeuristicBenchmark());
         algFactory.add(() -> new AStarALTBenchmark(1));
@@ -401,5 +463,4 @@ public class DijkstraShortestPathPerformanceTest
         }
 
     }
-
 }
