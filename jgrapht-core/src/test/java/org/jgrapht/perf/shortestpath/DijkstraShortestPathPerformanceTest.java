@@ -242,6 +242,55 @@ public class DijkstraShortestPathPerformanceTest
             return "A* with ALT heuristic (" + totalLandmarks + " random landmarks)";
         }
     }
+    
+    public static class AStarInconsistentNoHeuristicBenchmark
+        extends
+        BenchmarkBase
+    {
+        @Override
+        ShortestPathAlgorithm<Integer, DefaultWeightedEdge> createSolver(
+            Graph<Integer, DefaultWeightedEdge> graph)
+        {
+            return new AStarInconsistentShortestPath<>(graph, (u, t) -> 0d);
+
+        }
+
+        @Override
+        public String toString()
+        {
+            return "A* Inconsistent no heuristic";
+        }
+    }
+    
+    public static class AStarInconsistentALTBenchmark
+        extends
+        BenchmarkBase
+    {
+        private int totalLandmarks;
+
+        AStarInconsistentALTBenchmark(int totalLandmarks)
+        {
+            this.totalLandmarks = totalLandmarks;
+        }
+
+        @Override
+        ShortestPathAlgorithm<Integer, DefaultWeightedEdge> createSolver(
+            Graph<Integer, DefaultWeightedEdge> graph)
+        {
+            Integer[] vertices = graph.vertexSet().toArray(new Integer[0]);
+            Set<Integer> landmarks = new HashSet<>();
+            while (landmarks.size() < totalLandmarks) {
+                landmarks.add(vertices[rng.nextInt(graph.vertexSet().size())]);
+            }
+            return new AStarInconsistentShortestPath<>(graph, new ALTAdmissibleHeuristic<>(graph, landmarks));
+        }
+
+        @Override
+        public String toString()
+        {
+            return "A* Inconsistent ALT heuristic (" + totalLandmarks + " landmarks)";
+        }
+    }
 
     public static class BidirectionalAStarNoHeuristicBenchmark
         extends
@@ -308,8 +357,11 @@ public class DijkstraShortestPathPerformanceTest
         algFactory.add(() -> new ClosestFirstIteratorBenchmark());
         algFactory.add(() -> new DijkstraBenchmark());
         algFactory.add(() -> new AStarNoHeuristicBenchmark());
+        algFactory.add(() -> new AStarInconsistentNoHeuristicBenchmark());
         algFactory.add(() -> new AStarALTBenchmark(1));
         algFactory.add(() -> new AStarALTBenchmark(5));
+        algFactory.add(() -> new AStarInconsistentALTBenchmark(1));
+        algFactory.add(() -> new AStarInconsistentALTBenchmark(5));
         algFactory.add(() -> new BidirectionalDijkstraBenchmark());
         algFactory.add(() -> new BFSShortestPathBenchmark());
         algFactory.add(() -> new BidirectionalAStarALTBenchmark(1));

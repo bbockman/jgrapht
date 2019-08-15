@@ -123,7 +123,7 @@ public class AStarShortestPath<V, E>
      *
      * @param admissibleHeuristic admissible heuristic
      */
-    private void initialize(AStarAdmissibleHeuristic<V> admissibleHeuristic)
+    protected void initialize(AStarAdmissibleHeuristic<V> admissibleHeuristic)
     {
         this.admissibleHeuristic = admissibleHeuristic;
         openList = heapSupplier.get();
@@ -188,7 +188,7 @@ public class AStarShortestPath<V, E>
         return numberOfExpandedNodes;
     }
 
-    private void expandNode(AddressableHeap.Handle<Double, V> currentNode, V endVertex)
+    protected void expandNode(AddressableHeap.Handle<Double, V> currentNode, V endVertex)
     {
         numberOfExpandedNodes++;
 
@@ -240,7 +240,7 @@ public class AStarShortestPath<V, E>
      * @param pathLength length of the path
      * @return the shortest path from startVertex to endVertex
      */
-    private GraphPath<V, E> buildGraphPath(V startVertex, V targetVertex, double pathLength)
+    protected GraphPath<V, E> buildGraphPath(V startVertex, V targetVertex, double pathLength)
     {
         List<E> edgeList = new ArrayList<>();
         List<V> vertexList = new ArrayList<>();
