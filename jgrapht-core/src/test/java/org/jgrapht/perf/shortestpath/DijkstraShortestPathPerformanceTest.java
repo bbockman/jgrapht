@@ -63,7 +63,7 @@ public class DijkstraShortestPathPerformanceTest
             }
 
             this.graph = GraphTypeBuilder
-                .directed().weighted(true).edgeClass(DefaultWeightedEdge.class)
+                .undirected().weighted(true).edgeClass(DefaultWeightedEdge.class)
                 .vertexSupplier(SupplierUtil.createIntegerSupplier()).allowingMultipleEdges(true)
                 .allowingSelfLoops(true).buildGraph();
 
@@ -448,6 +448,7 @@ public class DijkstraShortestPathPerformanceTest
         List<Supplier<BenchmarkBase>> algFactory = new ArrayList<>();
         algFactory.add(() -> new AStarALTIncBenchmark(5));
         algFactory.add(() -> new AStarInconsistentALTIncBenchmark(5));
+        algFactory.add(() -> new BidirectionalAStarALTIncBenchmark(5));
         algFactory.add(() -> new ClosestFirstIteratorBenchmark());
         algFactory.add(() -> new DijkstraBenchmark());
         algFactory.add(() -> new AStarALTBenchmark(1));
@@ -458,7 +459,6 @@ public class DijkstraShortestPathPerformanceTest
         algFactory.add(() -> new AStarInconsistentNoHeuristicBenchmark());
         algFactory.add(() -> new BFSShortestPathBenchmark());
         algFactory.add(() -> new BidirectionalDijkstraBenchmark());
-        algFactory.add(() -> new BidirectionalAStarALTIncBenchmark(5));
         algFactory.add(() -> new BidirectionalAStarALTBenchmark(1));
         algFactory.add(() -> new BidirectionalAStarALTBenchmark(5));
         algFactory.add(() -> new BidirectionalAStarNoHeuristicBenchmark());

@@ -124,19 +124,6 @@ public class ALTInconsistentHeuristic<V, E>
             return maxEstimate;
         }
 
-        /*
-         * Special case, source is landmark
-         */
-        if (fromLandmark.containsKey(u)) {
-            return fromLandmark.get(u).get(t);
-        }
-
-        /*
-         * Special case, target is landmark
-         */
-        if (toLandmark.containsKey(t)) {
-            return toLandmark.get(t).get(u);
-        }
 
         /*
          * Compute from landmarks
@@ -157,7 +144,7 @@ public class ALTInconsistentHeuristic<V, E>
             estimate = Math.abs(from.get(u) - from.get(t));
         }
 
-        // max over all landmarks
+        // ensure no overflow 
         if (Double.isFinite(estimate)) {
             maxEstimate = Math.max(maxEstimate, estimate);
         }

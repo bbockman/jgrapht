@@ -143,7 +143,8 @@ public class AStarInconsistentShortestPath<V, E>
                     // open list if we discovered a shorter path to this node
                     if (improvedG) {
                         closedList.remove(successor);
-                        openList.insert(fScore, vertexToHeapNodeMap.get(successor).getValue());
+                        AddressableHeap.Handle<Double, V> heapNode = openList.insert(fScore, successor);
+                        vertexToHeapNodeMap.put(successor, heapNode);
                     }
 
                 } else { // It's in the open list, if H or G improved update its heap key

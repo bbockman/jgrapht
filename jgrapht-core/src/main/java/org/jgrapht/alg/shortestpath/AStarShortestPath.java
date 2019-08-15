@@ -219,7 +219,8 @@ public class AStarShortestPath<V, E>
                     // open list, since we discovered a shorter
                     // path to this node
                     closedList.remove(successor);
-                    openList.insert(fScore, vertexToHeapNodeMap.get(successor).getValue());
+                    AddressableHeap.Handle<Double, V> heapNode = openList.insert(fScore, successor);
+                    vertexToHeapNodeMap.put(successor, heapNode);
                 } else { // It's in the open list
                     vertexToHeapNodeMap.get(successor).decreaseKey(fScore);
                 }
