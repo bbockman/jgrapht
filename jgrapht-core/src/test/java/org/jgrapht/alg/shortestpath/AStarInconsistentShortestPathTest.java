@@ -1,3 +1,5 @@
+/* (C) Copyright 2015-2018, by Joris Kinable, Brooks Bockman and Contributors.
+*/
 package org.jgrapht.alg.shortestpath;
 
 import static org.junit.Assert.assertEquals;
@@ -6,10 +8,15 @@ import static org.junit.Assert.assertNull;
 
 import org.jgrapht.*;
 import org.jgrapht.alg.interfaces.*;
-import org.jgrapht.alg.shortestpath.BaseHeuristicSearchTest.*;
 import org.jgrapht.graph.*;
 import org.junit.*;
 
+/**
+ * Test class for AStarInconsistentShortestPath implementation
+ *
+ * @author Joris Kinable
+ * @author Brooks Bockman
+ */
 public class AStarInconsistentShortestPathTest
     extends
     AStarShortestPathTest

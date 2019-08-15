@@ -1,5 +1,6 @@
 /*
- * (C) Copyright 2015-2018, by Joris Kinable, Jon Robison, Thomas Breitbart and Contributors.
+ * (C) Copyright 2015-2018, by Joris Kinable, Jon Robison, Thomas Breitbart, 
+ * Brooks Bockman and Contributors.
  *
  * JGraphT : a free Java graph-theory library
  *
@@ -31,7 +32,7 @@ import java.util.function.*;
  * this algorithm reduces to exactly that of its parent.  When heuristics are not consistent, this
  * class uses a first order bidirectional pathmax to update heuristics as described in 
  * <a href="https://www.ijcai.org/Proceedings/09/Papers/111.pdf"> 
- * A* Search with Inconsistent Heuristics</a>.  
+ * A* Search with Inconsistent Heuristics</a>.
  * 
  * <p>
  * In the case of directed graphs, this algorithm first updates $h(i)$ for the node being expanded 
@@ -43,10 +44,10 @@ import java.util.function.*;
  * 
  * @param <V> the graph vertex type
  * @param <E> the graph edge type
- * @author Brooks Bockman
  * @author Joris Kinable
  * @author Jon Robison
  * @author Thomas Breitbart
+ * @author Brooks Bockman
  */
 public class AStarInconsistentShortestPath<V, E>
     extends

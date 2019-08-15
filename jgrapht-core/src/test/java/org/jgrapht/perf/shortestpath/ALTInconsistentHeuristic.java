@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016-2018, by Dimitrios Michail and Contributors.
+ * (C) Copyright 2016-2018, by Dimitrios Michail, Brooks Bockman and Contributors.
  *
  * JGraphT : a free Java graph-theory library
  *
@@ -27,17 +27,18 @@ import org.jgrapht.graph.*;
 import java.util.*;
 
 /**
- * An admissible heuristic for the A* algorithm using a set of landmarks and the triangle
- * inequality. Assumes that the graph contains non-negative edge weights.
+ * An admissible and probably inconsistent heuristic for the A* algorithm using a set of 
+ * landmarks and the triangle inequality. Assumes that the graph contains non-negative edge 
+ * weights.
  * 
  * This class is based on {@link ALTAdmissibleHeuristic} but when given multiple landmarks
  * the heuristic value for each node will be based on a random landmark instead of the
- * maximal landmark.  This does not guarantee inconsistency, but with 5 landmarks it is 
- * very likely.  This is not necessarily a good inconsistent heuristic and this class has
- * been created primarily for testing.
+ * maximal landmark.  This does not guarantee inconsistency, but with 5 landmarks 
+ * and a large graph it is likely.  This is not necessarily a good inconsistent heuristic 
+ * and this class has been created primarily for testing.
  *
- * @author Brooks Bockman
  * @author Dimitrios Michail
+ * @author Brooks Bockman
  *
  * @param <V> the graph vertex type
  * @param <E> the graph edge type
@@ -65,7 +66,6 @@ public class ALTInconsistentHeuristic<V, E>
      * @throws IllegalArgumentException if the graph contains edges with negative weights
      */
     
-    @SuppressWarnings("unchecked")
     public ALTInconsistentHeuristic(Graph<V, E> graph, Set<V> landmarks)
     {
         this.graph = Objects.requireNonNull(graph, "Graph cannot be null");
@@ -94,7 +94,9 @@ public class ALTInconsistentHeuristic<V, E>
             }
             precomputeToFromLandmark(v);
         }
-        keySet = (V[]) fromLandmark.keySet().toArray();
+        @SuppressWarnings("unchecked")
+        V[] temp = (V[]) fromLandmark.keySet().toArray();
+        keySet = temp;
     }
 
     /**

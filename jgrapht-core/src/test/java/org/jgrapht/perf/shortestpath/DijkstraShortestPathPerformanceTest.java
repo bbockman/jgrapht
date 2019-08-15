@@ -419,11 +419,11 @@ public class DijkstraShortestPathPerformanceTest
         algFactory.add(() -> new AStarALTIncBenchmark(5));
         algFactory.add(() -> new AStarInconsistentALTIncBenchmark(5));
         algFactory.add(() -> new AStarNoHeuristicBenchmark());
-        algFactory.add(() -> new AStarInconsistentNoHeuristicBenchmark());
         algFactory.add(() -> new AStarALTBenchmark(1));
         algFactory.add(() -> new AStarALTBenchmark(5));
         algFactory.add(() -> new AStarInconsistentALTBenchmark(1));
         algFactory.add(() -> new AStarInconsistentALTBenchmark(5));
+        algFactory.add(() -> new AStarInconsistentNoHeuristicBenchmark());
         algFactory.add(() -> new BidirectionalDijkstraBenchmark());
         algFactory.add(() -> new BFSShortestPathBenchmark());
         algFactory.add(() -> new BidirectionalAStarALTBenchmark(1));
