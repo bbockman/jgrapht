@@ -111,9 +111,8 @@ public class AStarInconsistentShortestPath<V, E>
         for (E edge : outgoingEdges) {
             V successor = Graphs.getOppositeVertex(graph, edge, currentVertex);
 
-            if (successor.equals(currentVertex)) { // Ignore self-loop
+            if (successor.equals(currentVertex)) // Ignore self-loop
                 continue;
-            }
 
             double tentativeGScore = gScoreMap.get(currentVertex) + graph.getEdgeWeight(edge);
             double fScore;
@@ -143,8 +142,7 @@ public class AStarInconsistentShortestPath<V, E>
                     // open list if we discovered a shorter path to this node
                     if (improvedG) {
                         closedList.remove(successor);
-                        AddressableHeap.Handle<Double, V> heapNode = openList.insert(fScore, successor);
-                        vertexToHeapNodeMap.put(successor, heapNode);
+                        vertexToHeapNodeMap.put(successor, openList.insert(fScore, successor));
                     }
 
                 } else { // It's in the open list, if H or G improved update its heap key
@@ -162,8 +160,7 @@ public class AStarInconsistentShortestPath<V, E>
             } else { // We've encountered a new vertex.
                 cameFrom.put(successor, edge);
                 gScoreMap.put(successor, tentativeGScore);
-                AddressableHeap.Handle<Double, V> heapNode = openList.insert(fScore, successor);
-                vertexToHeapNodeMap.put(successor, heapNode);
+                vertexToHeapNodeMap.put(successor, openList.insert(fScore, successor));
             }
         }
     }
@@ -184,6 +181,8 @@ public class AStarInconsistentShortestPath<V, E>
         
         for (E edge : incomingEdges) {
             V parent = Graphs.getOppositeVertex(graph, edge, currentVertex);
+            if (currentVertex.equals(parent)) //ignore self-loops
+                continue;
             
             if (!hScoreMap.containsKey(parent)) {
                 hScoreMap.put(parent, admissibleHeuristic.getCostEstimate(parent, endVertex));
