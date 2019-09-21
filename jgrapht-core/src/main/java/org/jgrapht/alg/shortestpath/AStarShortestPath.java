@@ -86,6 +86,12 @@ public class AStarShortestPath<V, E>
 
     // Comparator for comparing doubles with tolerance
     protected Comparator<Double> comparator;
+    
+    // Mapping for updated heuristic values
+    protected Map<V, Double> hScoreMap;
+    
+    // Flag whether or not to use inconsistent optimization
+    protected boolean inconsistent;
 
     /**
      * Create a new instance of the A* shortest path algorithm.
@@ -116,6 +122,13 @@ public class AStarShortestPath<V, E>
             Objects.requireNonNull(admissibleHeuristic, "Heuristic function cannot be null!");
         this.comparator = new ToleranceDoubleComparator();
         this.heapSupplier = Objects.requireNonNull(heapSupplier, "Heap supplier cannot be null!");
+        
+        //flag to decide whether to use inconsistent optimization
+        if (admissibleHeuristic instanceof AStarInconsistentHeuristic) {
+            inconsistent = true;
+        }else {
+            inconsistent = false;
+        }
     }
 
     /**
@@ -130,6 +143,7 @@ public class AStarShortestPath<V, E>
         vertexToHeapNodeMap = new HashMap<>();
         closedList = new HashSet<>();
         gScoreMap = new HashMap<>();
+        hScoreMap = new HashMap<>();
         cameFrom = new HashMap<>();
         numberOfExpandedNodes = 0;
     }
@@ -196,43 +210,71 @@ public class AStarShortestPath<V, E>
     protected void expandNode(AddressableHeap.Handle<Double, V> currentNode, V endVertex)
     {
         numberOfExpandedNodes++;
+        
+        V currentVertex = currentNode.getValue();
 
-        Set<E> outgoingEdges = graph.outgoingEdgesOf(currentNode.getValue());
-
+        // If if using inconsistent heuristic "pull-up" parent h value 
+        double hParent = 0d;
+        if (inconsistent) {
+            hParent = ((AStarInconsistentHeuristic<V>) admissibleHeuristic)
+                .updateExpandedHeuristic(currentVertex, endVertex, hScoreMap);
+        }
+        
+        Set<E> outgoingEdges = graph.outgoingEdgesOf(currentVertex);
+        
         for (E edge : outgoingEdges) {
-            V successor = Graphs.getOppositeVertex(graph, edge, currentNode.getValue());
+            V successor = Graphs.getOppositeVertex(graph, edge, currentVertex);
 
-            if (successor.equals(currentNode.getValue())) { // Ignore self-loop
+            if (successor.equals(currentVertex)) // Ignore self-loop
                 continue;
-            }
 
-            double gScore_current = gScoreMap.get(currentNode.getValue());
-            double tentativeGScore = gScore_current + graph.getEdgeWeight(edge);
-            double fScore =
-                tentativeGScore + admissibleHeuristic.getCostEstimate(successor, endVertex);
+            double edgeWeight = graph.getEdgeWeight(edge);
+            double tentativeGScore = gScoreMap.get(currentVertex) + edgeWeight;
+            double fScore;
+            boolean improvedH = false;
+            
+            // If using inconsistent heuristic "pull up" successor h value 
+            if (inconsistent) {
+                improvedH = ((AStarInconsistentHeuristic<V>) admissibleHeuristic)
+                    .updateSuccessorHeuristic(successor, endVertex, hParent, edgeWeight, hScoreMap);
+                fScore = tentativeGScore + hScoreMap.get(successor);
+            }else {
+                fScore = tentativeGScore + admissibleHeuristic.getCostEstimate(successor, endVertex); 
+            }
 
             if (vertexToHeapNodeMap.containsKey(successor)) { // We re-encountered a vertex. It's
                 // either in the open or closed list.
-                if (tentativeGScore >= gScoreMap.get(successor)) // Ignore path since it is
-                    // non-improving
-                    continue;
-
-                cameFrom.put(successor, edge);
-                gScoreMap.put(successor, tentativeGScore);
+                boolean improvedG = false;
+                if (tentativeGScore < gScoreMap.get(successor)) { // If this is improving, update
+                    cameFrom.put(successor, edge);
+                    gScoreMap.put(successor, tentativeGScore);
+                    improvedG = true;
+                }
 
                 if (closedList.contains(successor)) { // it's in the closed list. Move node back to
-                    // open list, since we discovered a shorter
-                    // path to this node
-                    closedList.remove(successor);
-                    vertexToHeapNodeMap.put(successor, openList.insert(fScore, successor));
-                } else { // It's in the open list
-                    vertexToHeapNodeMap.get(successor).decreaseKey(fScore);
+                    // open list if we discovered a shorter path to this node
+                    if (improvedG) {
+                        closedList.remove(successor);
+                        vertexToHeapNodeMap.put(successor, openList.insert(fScore, successor));
+                    }
+
+                } else { // It's in the open list, if H or G improved update its heap key
+                    if (improvedH || improvedG) {
+                        AddressableHeap.Handle<Double, V> node = vertexToHeapNodeMap.get(successor);
+                        fScore = fScore - tentativeGScore + gScoreMap.get(successor);
+                        if (node.getKey() < fScore) {
+                            node.delete();
+                            vertexToHeapNodeMap.put(successor, openList.insert(fScore, successor));
+                        } else {
+                            node.decreaseKey(fScore);
+                        }
+                    }
                 }
+
             } else { // We've encountered a new vertex.
                 cameFrom.put(successor, edge);
                 gScoreMap.put(successor, tentativeGScore);
-                AddressableHeap.Handle<Double, V> heapNode = openList.insert(fScore, successor);
-                vertexToHeapNodeMap.put(successor, heapNode);
+                vertexToHeapNodeMap.put(successor, openList.insert(fScore, successor));
             }
         }
     }
@@ -261,5 +303,4 @@ public class AStarShortestPath<V, E>
         Collections.reverse(vertexList);
         return new GraphWalk<>(graph, startVertex, targetVertex, vertexList, edgeList, pathLength);
     }
-
 }
